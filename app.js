@@ -224,22 +224,18 @@ worldCupPlayers.reduce(
 );
 
 
-async function testFixtures(){
-
-    const today = new Date()
-        .toISOString()
-        .split("T")[0];
+async function testEvents(){
 
     const response = await fetch(
-        `${BASE_URL}/events/?date_from=${today}&date_to=${today}`,
+        `${BASE_URL}/events/?limit=1`,
         { headers }
     );
 
     const data = await response.json();
 
-    console.log("TODAYS FIXTURES");
+    console.log("EVENT TEST");
     console.log(data);
 
 }
 
-testFixtures();
+testEvents();
