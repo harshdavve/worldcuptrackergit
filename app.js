@@ -77,10 +77,62 @@ function displayPlayers(club,players){
     const dashboard = document.getElementById("dashboard");
 
     dashboard.innerHTML = `
-        <h2>${club.name} World Cup Tracker</h2>
-    `;
+    <h2>${club.name} World Cup Tracker</h2>
+
+    <div class="summary-grid">
+
+        <div class="summary-card">
+            <div class="summary-number">
+                ${playerCount}
+            </div>
+            <div class="summary-label">
+                Players
+            </div>
+        </div>
+
+        <div class="summary-card">
+            <div class="summary-number">
+                ${nationsRepresented}
+            </div>
+            <div class="summary-label">
+                Nations
+            </div>
+        </div>
+
+        <div class="summary-card">
+            <div class="summary-number">
+                ${marketValueDisplay}
+            </div>
+            <div class="summary-label">
+                Total Value
+            </div>
+        </div>
+
+    </div>
+`;
 
     const worldCupPlayers = getWorldCupPlayers(players);
+
+    const playerCount = worldCupPlayers.length;
+
+const nationsRepresented =
+[
+    ...new Set(
+        worldCupPlayers.map(
+            player => player.nationality
+        )
+    )
+].length;
+
+const totalMarketValue =
+worldCupPlayers.reduce(
+    (sum, player) =>
+        sum + (player.market_value_eur || 0),
+    0
+);
+
+const marketValueDisplay =
+`€${(totalMarketValue / 1000000).toFixed(0)}M`;
 
 dashboard.innerHTML += `
     <h3>
