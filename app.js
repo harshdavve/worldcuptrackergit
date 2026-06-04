@@ -186,20 +186,7 @@ card.innerHTML = `
 
 }
 
-  async function getTeams(){
-
-    const response = await fetch(
-        `${BASE_URL}/teams/?search=Arsenal`,
-        {headers}
-    );
-
-    const data = await response.json();
-
-    console.log(JSON.stringify(data,null,2));
-
-}
-
-getTeams();
+//
 
 function getWorldCupPlayers(players){
 
@@ -209,19 +196,6 @@ function getWorldCupPlayers(players){
 
 }
 
-const nations =
-[
- ...new Set(
-   worldCupPlayers.map(p => p.nationality)
- )
-].length;
-
-const totalValue =
-worldCupPlayers.reduce(
-  (sum,p) =>
-    sum + (p.market_value_eur || 0),
-  0
-);
 
 
 async function testEvents(){
