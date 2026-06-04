@@ -197,7 +197,6 @@ function getWorldCupPlayers(players){
 }
 
 
-
 async function testEvents(){
 
     const response = await fetch(
@@ -207,8 +206,8 @@ async function testEvents(){
 
     const data = await response.json();
 
-    console.log("EVENT TEST");
-    console.log(data);
+    console.log("FIRST EVENT");
+    console.log(data.results[0]);
 
 }
 
