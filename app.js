@@ -228,3 +228,19 @@ async function testEngland(){
 }
 
 testEngland();
+
+async function testEnglandFixtures(){
+
+    const response = await fetch(
+        `${BASE_URL}/events/?team_id=493`,
+        { headers }
+    );
+
+    const data = await response.json();
+
+    console.log("ENGLAND FIXTURES");
+    console.log(data);
+
+}
+
+testEnglandFixtures();
