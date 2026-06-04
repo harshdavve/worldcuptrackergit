@@ -212,3 +212,19 @@ async function testEvents(){
 }
 
 testEvents();
+
+async function testEngland(){
+
+    const response = await fetch(
+        `${BASE_URL}/teams/493/`,
+        { headers }
+    );
+
+    const data = await response.json();
+
+    console.log("TEAM 493");
+    console.log(data);
+
+}
+
+testEngland();
