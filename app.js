@@ -259,3 +259,8 @@ async function getUpcomingFixtures(teamId) {
     );
 
 }
+
+const englandFixtures =
+    await getUpcomingFixtures(493);
+
+console.log(englandFixtures);
