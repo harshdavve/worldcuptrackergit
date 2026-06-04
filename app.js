@@ -186,7 +186,7 @@ card.innerHTML = `
 
 }
 
-// async function getTeams(){
+  async function getTeams(){
 
     const response = await fetch(
         `${BASE_URL}/teams/?search=Arsenal`,
