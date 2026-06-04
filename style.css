@@ -1,0 +1,55 @@
+body{
+    background:#0f172a;
+    color:white;
+    font-family:Arial,sans-serif;
+    margin:0;
+    padding:30px;
+}
+
+h1{
+    text-align:center;
+}
+
+#clubGrid{
+    display:flex;
+    gap:15px;
+    flex-wrap:wrap;
+    justify-content:center;
+    margin-top:30px;
+}
+
+.club-card{
+    background:#1e293b;
+    padding:20px;
+    border-radius:12px;
+    cursor:pointer;
+    width:180px;
+    text-align:center;
+    transition:.3s;
+}
+
+.club-card:hover{
+    transform:translateY(-5px);
+}
+
+#dashboard{
+    margin-top:40px;
+}
+
+.player-card{
+    background:#1e293b;
+    border-radius:12px;
+    padding:20px;
+    transition:0.3s;
+}
+
+.player-card:hover{
+    transform:translateY(-5px);
+}
+
+.players-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(250px,1fr));
+    gap:20px;
+    margin-top:20px;
+}
