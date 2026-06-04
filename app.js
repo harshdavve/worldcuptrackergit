@@ -209,18 +209,37 @@ function getWorldCupPlayers(players){
 
 }
 
-async function testEvents(){
+const nations =
+[
+ ...new Set(
+   worldCupPlayers.map(p => p.nationality)
+ )
+].length;
+
+const totalValue =
+worldCupPlayers.reduce(
+  (sum,p) =>
+    sum + (p.market_value_eur || 0),
+  0
+);
+
+
+async function testFixtures(){
+
+    const today = new Date()
+        .toISOString()
+        .split("T")[0];
 
     const response = await fetch(
-        `${BASE_URL}/events/?limit=1`,
+        `${BASE_URL}/events/?date_from=${today}&date_to=${today}`,
         { headers }
     );
 
     const data = await response.json();
 
-    console.log("EVENT TEST");
+    console.log("TODAYS FIXTURES");
     console.log(data);
 
 }
 
-testEvents();
+testFixtures();
