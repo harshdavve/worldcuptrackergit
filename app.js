@@ -244,3 +244,18 @@ async function testEnglandFixtures(){
 }
 
 testEnglandFixtures();
+
+async function getUpcomingFixtures(teamId) {
+
+    const response = await fetch(
+        `${BASE_URL}/events/?team_id=${teamId}`,
+        { headers }
+    );
+
+    const data = await response.json();
+
+    return data.results.filter(
+        event => event.status === "notstarted"
+    );
+
+}
