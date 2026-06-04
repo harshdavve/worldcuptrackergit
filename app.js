@@ -186,7 +186,7 @@ card.innerHTML = `
 
 }
 
-async function getTeams(){
+// async function getTeams(){
 
     const response = await fetch(
         `${BASE_URL}/teams/?search=Arsenal`,
@@ -209,37 +209,18 @@ function getWorldCupPlayers(players){
 
 }
 
-const nations =
-[
- ...new Set(
-   worldCupPlayers.map(p => p.nationality)
- )
-].length;
-
-const totalValue =
-worldCupPlayers.reduce(
-  (sum,p) =>
-    sum + (p.market_value_eur || 0),
-  0
-);
-
-
-async function testFixtures(){
-
-    const today = new Date()
-        .toISOString()
-        .split("T")[0];
+async function testEvents(){
 
     const response = await fetch(
-        `${BASE_URL}/events/?date_from=${today}&date_to=${today}`,
+        `${BASE_URL}/events/?limit=1`,
         { headers }
     );
 
     const data = await response.json();
 
-    console.log("TODAYS FIXTURES");
+    console.log("EVENT TEST");
     console.log(data);
 
 }
 
-testFixtures();
+testEvents();
