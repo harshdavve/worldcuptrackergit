@@ -138,6 +138,13 @@ body{
 
 }
 
+.fixture-players{
+    margin-top:8px;
+    font-size:0.9rem;
+    color:#cfd8ff;
+    line-height:1.5;
+}
+
 .club-card,
 .player-card,
 .summary-card{
@@ -151,7 +158,22 @@ body{
     border-radius:20px;
 
     transition:0.3s;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    text-align:center;
 
+}
+
+.summary-number{
+    font-size:3rem;
+    font-weight:700;
+}
+
+.summary-label{
+    text-transform:uppercase;
+    letter-spacing:1px;
 }
 
 .club-card:hover,

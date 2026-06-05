@@ -250,6 +250,23 @@ async function displayPlayers(club, players) {
         document.getElementById(
             "fixtureGrid"
         );
+        const playersByNationalTeam = {};
+
+worldCupPlayers.forEach(player => {
+
+    if (!playersByNationalTeam[player.national_team_id]) {
+
+        playersByNationalTeam[
+            player.national_team_id
+        ] = [];
+
+    }
+
+    playersByNationalTeam[
+        player.national_team_id
+    ].push(player.name);
+
+});
 
     nextFiveFixtures.forEach(match => {
 
@@ -259,7 +276,22 @@ async function displayPlayers(club, players) {
         fixtureCard.className =
             "fixture-card";
 
-        fixtureCard.innerHTML = `
+     const homePlayers =
+    playersByNationalTeam[
+        match.home_team_id
+    ] || [];
+
+const awayPlayers =
+    playersByNationalTeam[
+        match.away_team_id
+    ] || [];
+
+const fixturePlayers = [
+    ...homePlayers,
+    ...awayPlayers
+];
+
+fixtureCard.innerHTML = `
     <div class="fixture-teams">
         ${match.home_team}
         <span>vs</span>
@@ -276,6 +308,10 @@ async function displayPlayers(club, players) {
                 month: "short"
             }
         )}
+    </div>
+
+    <div class="fixture-players">
+        👥 ${fixturePlayers.join(", ")}
     </div>
 `;
 
