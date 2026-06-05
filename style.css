@@ -1,3 +1,24 @@
+@media(max-width:768px){
+
+    .summary-grid{
+        grid-template-columns:1fr;
+    }
+
+    .players-grid{
+        grid-template-columns:1fr;
+    }
+
+    .club-grid{
+        grid-template-columns:
+            repeat(2,1fr);
+    }
+
+    .hero-title{
+        font-size:2rem;
+    }
+
+}
+
 body{
     background:#0f172a;
     color:white;
