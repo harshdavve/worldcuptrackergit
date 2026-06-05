@@ -17,7 +17,7 @@ const FLAGS = {
     Norway:"🇳🇴",
     Sweden:"🇸🇪",
     Ecuador:"🇪🇨",
-    Northern Ireland:"🇬🇧",
+    Ireland:"🇬🇧",
     Colombia:"🇨🇴",
     Portugal:"🇵🇹",
     Argentina:"🇦🇷",
