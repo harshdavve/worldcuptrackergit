@@ -27,9 +27,7 @@ const FLAGS = {
 
 renderClubs();
 
-<h2 class="section-title">
-    Popular Clubs
-</h2>
+
 
 function renderClubs() {
 
@@ -103,17 +101,14 @@ async function displayPlayers(club, players) {
         )
     ];
 
+    const fixtureResponses =
+        await Promise.all(
+            nationalTeamIds.map(
+                teamId => getUpcomingFixtures(teamId)
+            )
+        );
 
-    const fixtures = [];
-
-    for (const teamId of nationalTeamIds) {
-
-        const teamFixtures =
-            await getUpcomingFixtures(teamId);
-
-        fixtures.push(...teamFixtures);
-
-    }
+    const fixtures = fixtureResponses.flat();
 
     const uniqueFixtures = [
         ...new Map(
@@ -121,47 +116,81 @@ async function displayPlayers(club, players) {
         ).values()
     ];
 
-    const nextFiveFixtures =
-    uniqueFixtures
+    const nextFiveFixtures = [...uniqueFixtures]
         .sort(
-            (a,b) =>
+            (a, b) =>
                 new Date(a.event_date) -
                 new Date(b.event_date)
         )
-        .slice(0,5);
+        .slice(0, 5);
 
-    
     const nextFixtureByTeam = {};
 
-uniqueFixtures.forEach(fixture => {
+    uniqueFixtures.forEach(fixture => {
 
-    const fixtureDate = new Date(fixture.event_date);
+        const fixtureDate =
+            new Date(fixture.event_date);
 
-    const existing =
-        nextFixtureByTeam[fixture.home_team_id];
+        const homeExisting =
+            nextFixtureByTeam[
+                fixture.home_team_id
+            ];
 
-    if(
-        !existing ||
-        fixtureDate < new Date(existing.event_date)
-    ){
-        nextFixtureByTeam[fixture.home_team_id] = fixture;
-    }
+        if (
+            !homeExisting ||
+            fixtureDate <
+                new Date(homeExisting.event_date)
+        ) {
+            nextFixtureByTeam[
+                fixture.home_team_id
+            ] = fixture;
+        }
 
-    const existingAway =
-        nextFixtureByTeam[fixture.away_team_id];
+        const awayExisting =
+            nextFixtureByTeam[
+                fixture.away_team_id
+            ];
 
-    if(
-        !existingAway ||
-        fixtureDate < new Date(existingAway.event_date)
-    ){
-        nextFixtureByTeam[fixture.away_team_id] = fixture;
-    }
+        if (
+            !awayExisting ||
+            fixtureDate <
+                new Date(awayExisting.event_date)
+        ) {
+            nextFixtureByTeam[
+                fixture.away_team_id
+            ] = fixture;
+        }
 
-});
+    });
 
-    const fixtureCount = uniqueFixtures.length;
+    const sortedPlayers =
+        [...worldCupPlayers];
 
-    const playerCount = worldCupPlayers.length;
+    sortedPlayers.sort((a, b) => {
+
+        const fixtureA =
+            nextFixtureByTeam[
+                a.national_team_id
+            ];
+
+        const fixtureB =
+            nextFixtureByTeam[
+                b.national_team_id
+            ];
+
+        if (!fixtureA && !fixtureB) return 0;
+        if (!fixtureA) return 1;
+        if (!fixtureB) return -1;
+
+        return (
+            new Date(fixtureA.event_date) -
+            new Date(fixtureB.event_date)
+        );
+
+    });
+
+    const playerCount =
+        worldCupPlayers.length;
 
     const nationsRepresented = [
         ...new Set(
@@ -196,120 +225,136 @@ uniqueFixtures.forEach(fixture => {
 
             <div class="summary-card">
                 <div class="summary-number">
-                    ${fixtureCount}
+                    ${nextFiveFixtures.length}
                 </div>
                 <div class="summary-label">
-                    Upcoming Fixtures
+                    Playing Soon
                 </div>
             </div>
 
         </div>
+
+        <h3>🔥 Playing Soon</h3>
+
+        <div id="fixtureGrid"></div>
+
+        <h3>🌍 World Cup Players</h3>
     `;
 
-    dashboard.innerHTML += `
-    <h3>🔥 Playing Soon</h3>
-`;
+    const fixtureGrid =
+        document.getElementById(
+            "fixtureGrid"
+        );
 
-    dashboard.innerHTML += `
-        <h3>World Cup Players: ${playerCount}</h3>
-    `;
+    nextFiveFixtures.forEach(match => {
 
-    const playersGrid = document.createElement("div");
+        const fixtureCard =
+            document.createElement("div");
 
-    playersGrid.className = "players-grid";
+        fixtureCard.className =
+            "fixture-card";
+
+        fixtureCard.innerHTML = `
+            <strong>
+                ${match.home_team}
+            </strong>
+
+            vs
+
+            <strong>
+                ${match.away_team}
+            </strong>
+
+            <br>
+
+            ${new Date(
+                match.event_date
+            ).toLocaleDateString(
+                "en-GB",
+                {
+                    day: "numeric",
+                    month: "short"
+                }
+            )}
+        `;
+
+        fixtureGrid.appendChild(
+            fixtureCard
+        );
+
+    });
+
+    const playersGrid =
+        document.createElement("div");
+
+    playersGrid.className =
+        "players-grid";
 
     dashboard.appendChild(playersGrid);
 
-    const sortedPlayers = [...worldCupPlayers];
-
-sortedPlayers.sort((a, b) => {
-
-    const fixtureA =
-        nextFixtureByTeam[a.national_team_id];
-
-    const fixtureB =
-        nextFixtureByTeam[b.national_team_id];
-
-    if (!fixtureA && !fixtureB) return 0;
-    if (!fixtureA) return 1;
-    if (!fixtureB) return -1;
-
-    return new Date(fixtureA.event_date) -
-           new Date(fixtureB.event_date);
-
-});
-
     sortedPlayers.forEach(player => {
 
-        const card = document.createElement("div");
+        const card =
+            document.createElement("div");
 
-        card.className = "player-card";
+        card.className =
+            "player-card";
 
-        const age = player.date_of_birth
-            ? new Date().getFullYear() -
-              new Date(player.date_of_birth).getFullYear()
-            : "N/A";
+        const nextFixture =
+            nextFixtureByTeam[
+                player.national_team_id
+            ];
 
-        const marketValue = player.market_value_eur
-            ? `€${(player.market_value_eur / 1000000).toFixed(1)}m`
-            : "Unknown";
+        let nextMatchHTML =
+            "<p>No upcoming match</p>";
 
-            const nextFixture =
-    nextFixtureByTeam[player.national_team_id];
+        if (nextFixture) {
 
-let nextMatchHTML = "<p>No upcoming match</p>";
+            const matchDate =
+                new Date(
+                    nextFixture.event_date
+                );
 
-if(nextFixture){
+            nextMatchHTML = `
+                <p>
+                    <strong>
+                        ${nextFixture.home_team}
+                    </strong>
 
-    const matchDate =
-        new Date(nextFixture.event_date);
+                    vs
 
-    nextMatchHTML = `
-        <p>
-            <strong>Next Match:</strong><br>
-            ${nextFixture.home_team}
-            vs
-            ${nextFixture.away_team}
-        </p>
+                    <strong>
+                        ${nextFixture.away_team}
+                    </strong>
+                </p>
 
-        <p>
-             ${matchDate.toLocaleDateString("en-GB", {
-        day: "numeric",
-        month: "short"
-    })}
-        </p>
-    `;
-}
+                <p>
+                    📅
+                    ${matchDate.toLocaleDateString(
+                        "en-GB",
+                        {
+                            day: "numeric",
+                            month: "short"
+                        }
+                    )}
+                </p>
+            `;
+
+        }
 
         card.innerHTML = `
-            <h3>${player.name}</h3>
-
-            <p>
-                <strong>Position:</strong>
-                ${player.specific_position}
-            </p>
-
-            <p>
-                <strong>Nationality:</strong>
+            <h3>
                 ${FLAGS[player.nationality] || "🌍"}
+                ${player.name}
+            </h3>
+
+            <p>
+                ${player.specific_position}
+                •
                 ${player.nationality}
             </p>
 
-            <p>
-                <strong>Age:</strong>
-                ${age}
-            </p>
-
-            <p>
-                <strong>Market Value:</strong>
-                ${marketValue}
-            </p>
             ${nextMatchHTML}
-
-            <p>
-                <strong>Status:</strong>
-                ${player.availability}
-            </p>
         `;
 
         playersGrid.appendChild(card);
