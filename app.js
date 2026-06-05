@@ -237,7 +237,10 @@ if(nextFixture){
         </p>
 
         <p>
-            ${matchDate.toLocaleDateString()}
+             ${matchDate.toLocaleDateString("en-GB", {
+        day: "numeric",
+        month: "short"
+    })}
         </p>
     `;
 }
