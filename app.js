@@ -27,6 +27,10 @@ const FLAGS = {
 
 renderClubs();
 
+<h2 class="section-title">
+    Popular Clubs
+</h2>
+
 function renderClubs() {
 
     const grid = document.getElementById("clubGrid");
@@ -117,6 +121,15 @@ async function displayPlayers(club, players) {
         ).values()
     ];
 
+    const nextFiveFixtures =
+    uniqueFixtures
+        .sort(
+            (a,b) =>
+                new Date(a.event_date) -
+                new Date(b.event_date)
+        )
+        .slice(0,5);
+
     
     const nextFixtureByTeam = {};
 
@@ -192,6 +205,10 @@ uniqueFixtures.forEach(fixture => {
 
         </div>
     `;
+
+    dashboard.innerHTML += `
+    <h3>🔥 Playing Soon</h3>
+`;
 
     dashboard.innerHTML += `
         <h3>World Cup Players: ${playerCount}</h3>
@@ -334,3 +351,28 @@ async function getUpcomingFixtures(teamId) {
     }
 
 }
+
+const searchInput =
+    document.getElementById("clubSearch");
+
+searchInput.addEventListener("input", e => {
+
+    const search =
+        e.target.value.toLowerCase();
+
+    const cards =
+        document.querySelectorAll(".club-card");
+
+    cards.forEach(card => {
+
+        const clubName =
+            card.innerText.toLowerCase();
+
+        card.style.display =
+            clubName.includes(search)
+            ? "block"
+            : "none";
+
+    });
+
+});
