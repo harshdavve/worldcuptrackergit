@@ -99,6 +99,25 @@ async function displayPlayers(club, players) {
         )
     ];
 
+
+    const fixtures = [];
+
+    for (const teamId of nationalTeamIds) {
+
+        const teamFixtures =
+            await getUpcomingFixtures(teamId);
+
+        fixtures.push(...teamFixtures);
+
+    }
+
+    const uniqueFixtures = [
+        ...new Map(
+            fixtures.map(f => [f.id, f])
+        ).values()
+    ];
+
+    
     const nextFixtureByTeam = {};
 
 uniqueFixtures.forEach(fixture => {
@@ -126,23 +145,6 @@ uniqueFixtures.forEach(fixture => {
     }
 
 });
-
-    const fixtures = [];
-
-    for (const teamId of nationalTeamIds) {
-
-        const teamFixtures =
-            await getUpcomingFixtures(teamId);
-
-        fixtures.push(...teamFixtures);
-
-    }
-
-    const uniqueFixtures = [
-        ...new Map(
-            fixtures.map(f => [f.id, f])
-        ).values()
-    ];
 
     const fixtureCount = uniqueFixtures.length;
 
