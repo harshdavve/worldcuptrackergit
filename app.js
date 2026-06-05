@@ -7,13 +7,22 @@ const headers = {
 };
 
 const FLAGS = {
-    England: "🇬🇧",
-    France: "🇫🇷",
-    Brazil: "🇧🇷",
-    Spain: "🇪🇸",
-    Germany: "🇩🇪",
-    Netherlands: "🇳🇱",
-    Belgium: "🇧🇪"
+    England:"🇬🇧",
+    France:"🇫🇷",
+    Brazil:"🇧🇷",
+    Spain:"🇪🇸",
+    Germany:"🇩🇪",
+    Netherlands:"🇳🇱",
+    Belgium:"🇧🇪",
+    Norway:"🇳🇴",
+    Sweden:"🇸🇪",
+    Ecuador:"🇪🇨",
+    Northern Ireland:"🇬🇧",
+    Colombia:"🇨🇴",
+    Portugal:"🇵🇹",
+    Argentina:"🇦🇷",
+    Italy:"🇮🇹",
+    Croatia:"🇭🇷"
 };
 
 renderClubs();
@@ -89,6 +98,34 @@ async function displayPlayers(club, players) {
                 .filter(Boolean)
         )
     ];
+
+    const nextFixtureByTeam = {};
+
+uniqueFixtures.forEach(fixture => {
+
+    const fixtureDate = new Date(fixture.event_date);
+
+    const existing =
+        nextFixtureByTeam[fixture.home_team_id];
+
+    if(
+        !existing ||
+        fixtureDate < new Date(existing.event_date)
+    ){
+        nextFixtureByTeam[fixture.home_team_id] = fixture;
+    }
+
+    const existingAway =
+        nextFixtureByTeam[fixture.away_team_id];
+
+    if(
+        !existingAway ||
+        fixtureDate < new Date(existingAway.event_date)
+    ){
+        nextFixtureByTeam[fixture.away_team_id] = fixture;
+    }
+
+});
 
     const fixtures = [];
 
@@ -179,6 +216,30 @@ async function displayPlayers(club, players) {
             ? `€${(player.market_value_eur / 1000000).toFixed(1)}m`
             : "Unknown";
 
+            const nextFixture =
+    nextFixtureByTeam[player.national_team_id];
+
+let nextMatchHTML = "<p>No upcoming match</p>";
+
+if(nextFixture){
+
+    const matchDate =
+        new Date(nextFixture.event_date);
+
+    nextMatchHTML = `
+        <p>
+            <strong>Next Match:</strong><br>
+            ${nextFixture.home_team}
+            vs
+            ${nextFixture.away_team}
+        </p>
+
+        <p>
+            ${matchDate.toLocaleDateString()}
+        </p>
+    `;
+}
+
         card.innerHTML = `
             <h3>${player.name}</h3>
 
@@ -202,6 +263,7 @@ async function displayPlayers(club, players) {
                 <strong>Market Value:</strong>
                 ${marketValue}
             </p>
+            ${nextMatchHTML}
 
             <p>
                 <strong>Status:</strong>
