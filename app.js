@@ -203,7 +203,26 @@ uniqueFixtures.forEach(fixture => {
 
     dashboard.appendChild(playersGrid);
 
-    worldCupPlayers.forEach(player => {
+    const sortedPlayers = [...worldCupPlayers];
+
+sortedPlayers.sort((a, b) => {
+
+    const fixtureA =
+        nextFixtureByTeam[a.national_team_id];
+
+    const fixtureB =
+        nextFixtureByTeam[b.national_team_id];
+
+    if (!fixtureA && !fixtureB) return 0;
+    if (!fixtureA) return 1;
+    if (!fixtureB) return -1;
+
+    return new Date(fixtureA.event_date) -
+           new Date(fixtureB.event_date);
+
+});
+
+    sortedPlayers.forEach(player => {
 
         const card = document.createElement("div");
 
