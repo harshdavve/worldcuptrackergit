@@ -27,6 +27,14 @@ body{
     padding:30px;
 }
 
+.dashboard-section{
+    margin-top:40px;
+}
+
+.section-title{
+    margin-bottom:20px;
+}
+
 h1{
     text-align:center;
 }
