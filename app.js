@@ -72,11 +72,38 @@ async function loadClub(club){
 
 }
 
-function displayPlayers(club,players){
+    async function displayPlayers(club,players){
 
     const dashboard = document.getElementById("dashboard");
 
     const worldCupPlayers = getWorldCupPlayers(players);
+    const nationalTeamIds =
+[
+    ...new Set(
+        worldCupPlayers
+            .map(player => player.national_team_id)
+            .filter(Boolean)
+    )
+];
+
+const fixtures = [];
+
+for(const teamId of nationalTeamIds){
+
+    const teamFixtures =
+        await getUpcomingFixtures(teamId);
+
+    fixtures.push(...teamFixtures);
+
+}
+
+const fixtureCount =
+new Set(
+    fixtures.map(f => f.id)
+).size;
+
+console.log("FIXTURES");
+console.log(fixtures);
 
     const playerCount = worldCupPlayers.length;
 
@@ -89,15 +116,7 @@ const nationsRepresented =
     )
 ].length;
 
-const totalMarketValue =
-worldCupPlayers.reduce(
-    (sum, player) =>
-        sum + (player.market_value_eur || 0),
-    0
-);
 
-const marketValueDisplay =
-`€${(totalMarketValue / 1000000).toFixed(0)}M`;
 
     dashboard.innerHTML = `
     <h2>${club.name} World Cup Tracker</h2>
@@ -124,10 +143,10 @@ const marketValueDisplay =
 
         <div class="summary-card">
             <div class="summary-number">
-                ${marketValueDisplay}
+                ${fixtureCount}
             </div>
             <div class="summary-label">
-                Total Value
+                Upcoming Fixtures
             </div>
         </div>
 
@@ -208,54 +227,4 @@ async function testEvents(){
 
     console.log("FIRST EVENT");
     console.log(data.results[0]);
-
-}
-
-testEvents();
-
-async function testEngland(){
-
-    const response = await fetch(
-        `${BASE_URL}/teams/493/`,
-        { headers }
-    );
-
-    const data = await response.json();
-
-    console.log("TEAM 493");
-    console.log(data);
-
-}
-
-testEngland();
-
-async function testEnglandFixtures(){
-
-    const response = await fetch(
-        `${BASE_URL}/events/?team_id=493`,
-        { headers }
-    );
-
-    const data = await response.json();
-
-    console.log("ENGLAND FIXTURES");
-    console.log(data);
-
-}
-
-testEnglandFixtures();
-
-async function getUpcomingFixtures(teamId) {
-
-    const response = await fetch(
-        `${BASE_URL}/events/?team_id=${teamId}`,
-        { headers }
-    );
-
-    const data = await response.json();
-
-    return data.results.filter(
-        event => event.status === "notstarted"
-    );
-
 }
