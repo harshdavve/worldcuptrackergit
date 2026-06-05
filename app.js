@@ -163,6 +163,9 @@ async function displayPlayers(club, players) {
 
     });
 
+    const matchesThisWeek =
+    nextFiveFixtures.length;
+
     const sortedPlayers =
         [...worldCupPlayers];
 
@@ -206,13 +209,13 @@ async function displayPlayers(club, players) {
         <div class="summary-grid">
 
             <div class="summary-card">
-                <div class="summary-number">
-                    ${playerCount}
-                </div>
-                <div class="summary-label">
-                    Players
-                </div>
-            </div>
+    <div class="summary-number">
+        ${matchesThisWeek}
+    </div>
+    <div class="summary-label">
+        Matches This Week
+    </div>
+</div>
 
             <div class="summary-card">
                 <div class="summary-number">
@@ -234,7 +237,9 @@ async function displayPlayers(club, players) {
 
         </div>
 
-        <h3>🔥 Playing Soon</h3>
+        <h3 class="section-heading">
+    ⚽ Next 5 World Cup Fixtures
+</h3>
 
         <div id="fixtureGrid"></div>
 
@@ -255,28 +260,24 @@ async function displayPlayers(club, players) {
             "fixture-card";
 
         fixtureCard.innerHTML = `
-            <strong>
-                ${match.home_team}
-            </strong>
+    <div class="fixture-teams">
+        ${match.home_team}
+        <span>vs</span>
+        ${match.away_team}
+    </div>
 
-            vs
-
-            <strong>
-                ${match.away_team}
-            </strong>
-
-            <br>
-
-            ${new Date(
-                match.event_date
-            ).toLocaleDateString(
-                "en-GB",
-                {
-                    day: "numeric",
-                    month: "short"
-                }
-            )}
-        `;
+    <div class="fixture-date">
+        📅 ${new Date(
+            match.event_date
+        ).toLocaleDateString(
+            "en-GB",
+            {
+                day: "numeric",
+                month: "short"
+            }
+        )}
+    </div>
+`;
 
         fixtureGrid.appendChild(
             fixtureCard
@@ -400,6 +401,8 @@ async function getUpcomingFixtures(teamId) {
 const searchInput =
     document.getElementById("clubSearch");
 
+if(searchInput){
+
 searchInput.addEventListener("input", e => {
 
     const search =
@@ -421,3 +424,4 @@ searchInput.addEventListener("input", e => {
     });
 
 });
+}
