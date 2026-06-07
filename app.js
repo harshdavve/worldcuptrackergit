@@ -617,6 +617,8 @@ async function getMatchScorers(eventId) {
     }
 
 }
+
+const searchInput =
     document.getElementById("clubSearch");
 
 if(searchInput){
