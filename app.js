@@ -590,22 +590,32 @@ async function getMatchScorers(eventId) {
     try {
 
         const response = await fetch(
-            `${BASE_URL}/events/${eventId}/`,
+            `${BASE_URL}/events/${eventId}/incidents/`,
             { headers }
         );
 
         const data = await response.json();
 
-        const timeline =
-            data.timeline || data.events || [];
+        const incidents =
+            data.results || data.incidents || data || [];
 
-        return timeline
-            .filter(
-                event =>
-                    event.type === "goal" &&
-                    event.type !== "own_goal"
-            )
-            .map(event => event.player);
+        return incidents
+            .filter(incident => {
+                const type =
+                    incident.type ||
+                    incident.incident_type ||
+                    "";
+                const isOwnGoal =
+                    incident.is_own_goal ||
+                    incident.own_goal ||
+                    type === "own_goal";
+                return type === "goal" && !isOwnGoal;
+            })
+            .map(incident =>
+                incident.player_name ||
+                incident.player ||
+                "Unknown"
+            );
 
     }
     catch (error) {
