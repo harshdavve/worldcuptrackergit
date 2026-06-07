@@ -148,6 +148,19 @@ const lastFiveResults =
     )
     .slice(0, 5);
 
+const scorersByMatch = {};
+
+const scorerResponses = await Promise.all(
+    lastFiveResults.map(
+        match => getMatchScorers(match.id)
+    )
+);
+
+lastFiveResults.forEach((match, index) => {
+    scorersByMatch[match.id] =
+        scorerResponses[index];
+});
+
 const nextFixtureByTeam = {};
 
 uniqueFixtures.forEach(fixture => {
@@ -402,6 +415,16 @@ lastFiveResults.forEach(match => {
     resultCard.className =
         "fixture-card";
 
+    const scorers =
+        scorersByMatch[match.id] || [];
+
+    const scorersHTML =
+        scorers.length > 0
+            ? `<div class="fixture-players">
+                   ⚽ ${scorers.join(", ")}
+               </div>`
+            : "";
+
     resultCard.innerHTML = `
         <div class="fixture-teams">
             ${match.home_team}
@@ -422,6 +445,8 @@ lastFiveResults.forEach(match => {
                 }
             )}
         </div>
+
+        ${scorersHTML}
     `;
 
     resultsGrid.appendChild(
@@ -560,7 +585,38 @@ async function getRecentFixtures(teamId) {
 
 }
 
-const searchInput =
+async function getMatchScorers(eventId) {
+
+    try {
+
+        const response = await fetch(
+            `${BASE_URL}/events/${eventId}/`,
+            { headers }
+        );
+
+        const data = await response.json();
+
+        const timeline =
+            data.timeline || data.events || [];
+
+        return timeline
+            .filter(
+                event =>
+                    event.type === "goal" &&
+                    event.type !== "own_goal"
+            )
+            .map(event => event.player);
+
+    }
+    catch (error) {
+
+        console.error(error);
+
+        return [];
+
+    }
+
+}
     document.getElementById("clubSearch");
 
 if(searchInput){
