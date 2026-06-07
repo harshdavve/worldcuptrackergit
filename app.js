@@ -108,6 +108,29 @@ async function displayPlayers(club, players) {
             )
         );
 
+        const recentFixtureResponses =
+    await Promise.all(
+        nationalTeamIds.map(
+            teamId => getRecentFixtures(teamId)
+        )
+    );
+
+const recentFixtures =
+    recentFixtureResponses.flat();
+
+    const lastFiveResults =
+    [...new Map(
+        recentFixtures.map(
+            fixture => [fixture.id, fixture]
+        )
+    ).values()]
+    .sort(
+        (a,b) =>
+            new Date(b.event_date) -
+            new Date(a.event_date)
+    )
+    .slice(0,5);
+
     const fixtures = fixtureResponses.flat();
 
     const uniqueFixtures = [
@@ -239,13 +262,64 @@ async function displayPlayers(club, players) {
 
         <h3 class="section-heading">
     ⚽ Next 5 World Cup Fixtures
+    🏆 Last 5 Results
 </h3>
-
+<div id="resultsGrid"></div>
         <div id="fixtureGrid"></div>
 
         <h3>🌍 World Cup Players</h3>
     `;
+    const resultsGrid =
+    document.getElementById(
+        "resultsGrid"
+    );
+    lastFiveResults.forEach(match => {
 
+    const resultCard =
+        document.createElement("div");
+
+    resultCard.className =
+        "fixture-card";
+
+    resultCard.innerHTML = `
+        <div class="fixture-teams">
+            ${match.home_team}
+            ${match.home_score}
+            -
+            ${match.away_score}
+            ${match.away_team}
+        </div>
+
+        <div class="fixture-date">
+            📅 ${new Date(
+                match.event_date
+            ).toLocaleDateString(
+                "en-GB",
+                {
+                    day:"numeric",
+                    month:"short"
+                }
+            )}
+        </div>
+    `;
+
+    resultsGrid.appendChild(
+        resultCard
+    );
+
+});
+
+<button
+    class="notify-btn"
+    onclick="saveNotification(
+        ${match.id},
+        '${match.home_team}',
+        '${match.away_team}',
+        '${match.event_date}'
+    )"
+>
+🔔 Notify Me
+</button>
     const fixtureGrid =
         document.getElementById(
             "fixtureGrid"
@@ -434,6 +508,32 @@ async function getUpcomingFixtures(teamId) {
 
 }
 
+async function getRecentFixtures(teamId) {
+
+    try {
+
+        const response = await fetch(
+            `${BASE_URL}/events/?team_id=${teamId}`,
+            { headers }
+        );
+
+        const data = await response.json();
+
+        return data.results.filter(
+            event => event.status === "finished"
+        );
+
+    }
+    catch(error){
+
+        console.error(error);
+
+        return [];
+
+    }
+
+}
+
 const searchInput =
     document.getElementById("clubSearch");
 
@@ -460,4 +560,38 @@ searchInput.addEventListener("input", e => {
     });
 
 });
+}
+
+function saveNotification(
+    fixtureId,
+    homeTeam,
+    awayTeam,
+    matchDate
+){
+
+    const notifications =
+        JSON.parse(
+            localStorage.getItem(
+                "notifications"
+            ) || "[]"
+        );
+
+    notifications.push({
+        fixtureId,
+        homeTeam,
+        awayTeam,
+        matchDate
+    });
+
+    localStorage.setItem(
+        "notifications",
+        JSON.stringify(
+            notifications
+        )
+    );
+
+    alert(
+        "Notification saved!"
+    );
+
 }
