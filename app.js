@@ -89,57 +89,46 @@ async function loadClub(club) {
 
 async function displayPlayers(club, players) {
 
-    const dashboard = document.getElementById("dashboard");
+```
+const dashboard = document.getElementById("dashboard");
 
-    const worldCupPlayers = getWorldCupPlayers(players);
+const worldCupPlayers = getWorldCupPlayers(players);
 
-    const nationalTeamIds = [
-        ...new Set(
-            worldCupPlayers
-                .map(player => player.national_team_id)
-                .filter(Boolean)
-        )
-    ];
+const nationalTeamIds = [
+    ...new Set(
+        worldCupPlayers
+            .map(player => player.national_team_id)
+            .filter(Boolean)
+    )
+];
 
-    const fixtureResponses =
-        await Promise.all(
-            nationalTeamIds.map(
-                teamId => getUpcomingFixtures(teamId)
-            )
-        );
+const fixtureResponses = await Promise.all(
+    nationalTeamIds.map(
+        teamId => getUpcomingFixtures(teamId)
+    )
+);
 
-        const recentFixtureResponses =
-    await Promise.all(
-        nationalTeamIds.map(
-            teamId => getRecentFixtures(teamId)
-        )
-    );
+const recentFixtureResponses = await Promise.all(
+    nationalTeamIds.map(
+        teamId => getRecentFixtures(teamId)
+    )
+);
+
+const fixtures = fixtureResponses.flat();
 
 const recentFixtures =
     recentFixtureResponses.flat();
 
-    const lastFiveResults =
-    [...new Map(
-        recentFixtures.map(
+const uniqueFixtures = [
+    ...new Map(
+        fixtures.map(
             fixture => [fixture.id, fixture]
         )
-    ).values()]
-    .sort(
-        (a,b) =>
-            new Date(b.event_date) -
-            new Date(a.event_date)
-    )
-    .slice(0,5);
+    ).values()
+];
 
-    const fixtures = fixtureResponses.flat();
-
-    const uniqueFixtures = [
-        ...new Map(
-            fixtures.map(f => [f.id, f])
-        ).values()
-    ];
-
-    const nextFiveFixtures = [...uniqueFixtures]
+const nextFiveFixtures =
+    [...uniqueFixtures]
         .sort(
             (a, b) =>
                 new Date(a.event_date) -
@@ -147,155 +136,266 @@ const recentFixtures =
         )
         .slice(0, 5);
 
-    const nextFixtureByTeam = {};
+const lastFiveResults =
+    [...new Map(
+        recentFixtures.map(
+            fixture => [fixture.id, fixture]
+        )
+    ).values()]
+    .sort(
+        (a, b) =>
+            new Date(b.event_date) -
+            new Date(a.event_date)
+    )
+    .slice(0, 5);
 
-    uniqueFixtures.forEach(fixture => {
+const nextFixtureByTeam = {};
 
-        const fixtureDate =
-            new Date(fixture.event_date);
+uniqueFixtures.forEach(fixture => {
 
-        const homeExisting =
+    const fixtureDate =
+        new Date(fixture.event_date);
+
+    if (
+        !nextFixtureByTeam[
+            fixture.home_team_id
+        ] ||
+        fixtureDate <
+        new Date(
             nextFixtureByTeam[
                 fixture.home_team_id
-            ];
+            ].event_date
+        )
+    ) {
+        nextFixtureByTeam[
+            fixture.home_team_id
+        ] = fixture;
+    }
 
-        if (
-            !homeExisting ||
-            fixtureDate <
-                new Date(homeExisting.event_date)
-        ) {
-            nextFixtureByTeam[
-                fixture.home_team_id
-            ] = fixture;
-        }
-
-        const awayExisting =
-            nextFixtureByTeam[
-                fixture.away_team_id
-            ];
-
-        if (
-            !awayExisting ||
-            fixtureDate <
-                new Date(awayExisting.event_date)
-        ) {
+    if (
+        !nextFixtureByTeam[
+            fixture.away_team_id
+        ] ||
+        fixtureDate <
+        new Date(
             nextFixtureByTeam[
                 fixture.away_team_id
-            ] = fixture;
-        }
+            ].event_date
+        )
+    ) {
+        nextFixtureByTeam[
+            fixture.away_team_id
+        ] = fixture;
+    }
 
-    });
+});
 
-    const matchesThisWeek =
-    nextFiveFixtures.length;
+const sortedPlayers =
+    [...worldCupPlayers];
 
-    const playersPlayingSoon = sortedPlayers.filter(player => {
+sortedPlayers.sort((a, b) => {
 
-    const fixture =
-        nextFixtureByTeam[player.national_team_id];
+    const fixtureA =
+        nextFixtureByTeam[
+            a.national_team_id
+        ];
 
-    if (!fixture) return false;
+    const fixtureB =
+        nextFixtureByTeam[
+            b.national_team_id
+        ];
 
-    const fixtureDate = new Date(fixture.event_date);
-
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
+    if (!fixtureA && !fixtureB) return 0;
+    if (!fixtureA) return 1;
+    if (!fixtureB) return -1;
 
     return (
-        fixtureDate.toDateString() ===
-        tomorrow.toDateString()
+        new Date(fixtureA.event_date) -
+        new Date(fixtureB.event_date)
     );
 
-}).length;
+});
 
-    const sortedPlayers =
-        [...worldCupPlayers];
+const tomorrow = new Date();
 
-    sortedPlayers.sort((a, b) => {
+tomorrow.setDate(
+    tomorrow.getDate() + 1
+);
 
-        const fixtureA =
+const playersPlayingSoon =
+    sortedPlayers.filter(player => {
+
+        const fixture =
             nextFixtureByTeam[
-                a.national_team_id
+                player.national_team_id
             ];
 
-        const fixtureB =
-            nextFixtureByTeam[
-                b.national_team_id
-            ];
-
-        if (!fixtureA && !fixtureB) return 0;
-        if (!fixtureA) return 1;
-        if (!fixtureB) return -1;
+        if (!fixture) return false;
 
         return (
-            new Date(fixtureA.event_date) -
-            new Date(fixtureB.event_date)
+            new Date(
+                fixture.event_date
+            ).toDateString() ===
+            tomorrow.toDateString()
         );
 
-    });
+    }).length;
 
-    const playerCount =
-        worldCupPlayers.length;
-
-    const nationsRepresented = [
-        ...new Set(
-            worldCupPlayers.map(
-                player => player.nationality
-            )
+const nationsRepresented = [
+    ...new Set(
+        worldCupPlayers.map(
+            player => player.nationality
         )
-    ].length;
+    )
+].length;
 
-    dashboard.innerHTML = `
-        <h2>${club.name} World Cup Tracker</h2>
+dashboard.innerHTML = `
+    <h2>${club.name} World Cup Tracker</h2>
 
-        <div class="summary-grid">
+    <div class="summary-grid">
 
-            <div class="summary-card">
-    <div class="summary-number">
-        ${matchesThisWeek}
-    </div>
-    <div class="summary-label">
-        Matches This Week
-    </div>
-</div>
-
-            <div class="summary-card">
-                <div class="summary-number">
-                    ${nationsRepresented}
-                </div>
-                <div class="summary-label">
-                    Nations
-                </div>
+        <div class="summary-card">
+            <div class="summary-number">
+                ${worldCupPlayers.length}
             </div>
-
-            <div class="summary-card">
-                <div class="summary-number">
-                   ${playersPlayingSoon}
-                </div>
-                <div class="summary-label">
-                    Playing Soon
-                </div>
+            <div class="summary-label">
+                Players
             </div>
-
         </div>
 
-        <h3 class="section-heading">
-    ⚽ Next 5 World Cup Fixtures
-</h3>
+        <div class="summary-card">
+            <div class="summary-number">
+                ${nationsRepresented}
+            </div>
+            <div class="summary-label">
+                Nations
+            </div>
+        </div>
 
-<div id="fixtureGrid"></div>
+        <div class="summary-card">
+            <div class="summary-number">
+                ${playersPlayingSoon}
+            </div>
+            <div class="summary-label">
+                Playing Tomorrow
+            </div>
+        </div>
 
-<h3 class="section-heading">
-    🏆 Last 5 Results
-</h3>
+    </div>
 
-<div id="resultsGrid"></div>
+    <h3 class="section-heading">
+        ⚽ Next 5 World Cup Fixtures
+    </h3>
 
-    const resultsGrid =
+    <div id="fixtureGrid"></div>
+
+    <h3 class="section-heading">
+        🏆 Last 5 Results
+    </h3>
+
+    <div id="resultsGrid"></div>
+
+    <h3 class="section-heading">
+        🌍 World Cup Players
+    </h3>
+`;
+
+const playersByNationalTeam = {};
+
+worldCupPlayers.forEach(player => {
+
+    if (
+        !playersByNationalTeam[
+            player.national_team_id
+        ]
+    ) {
+        playersByNationalTeam[
+            player.national_team_id
+        ] = [];
+    }
+
+    playersByNationalTeam[
+        player.national_team_id
+    ].push(player.name);
+
+});
+
+const fixtureGrid =
+    document.getElementById(
+        "fixtureGrid"
+    );
+
+nextFiveFixtures.forEach(match => {
+
+    const homePlayers =
+        playersByNationalTeam[
+            match.home_team_id
+        ] || [];
+
+    const awayPlayers =
+        playersByNationalTeam[
+            match.away_team_id
+        ] || [];
+
+    const fixturePlayers = [
+        ...homePlayers,
+        ...awayPlayers
+    ];
+
+    const fixtureCard =
+        document.createElement("div");
+
+    fixtureCard.className =
+        "fixture-card";
+
+    fixtureCard.innerHTML = `
+        <div class="fixture-teams">
+            ${match.home_team}
+            vs
+            ${match.away_team}
+        </div>
+
+        <div class="fixture-date">
+            📅 ${new Date(
+                match.event_date
+            ).toLocaleDateString(
+                "en-GB",
+                {
+                    day: "numeric",
+                    month: "short"
+                }
+            )}
+        </div>
+
+        <div class="fixture-players">
+            👥 ${fixturePlayers.join(", ")}
+        </div>
+
+        <button
+            class="notify-btn"
+            onclick="saveNotification(
+                ${match.id},
+                '${match.home_team}',
+                '${match.away_team}',
+                '${match.event_date}'
+            )"
+        >
+            🔔 Notify Me
+        </button>
+    `;
+
+    fixtureGrid.appendChild(
+        fixtureCard
+    );
+
+});
+
+const resultsGrid =
     document.getElementById(
         "resultsGrid"
     );
-    lastFiveResults.forEach(match => {
+
+lastFiveResults.forEach(match => {
 
     const resultCard =
         document.createElement("div");
@@ -318,8 +418,8 @@ const recentFixtures =
             ).toLocaleDateString(
                 "en-GB",
                 {
-                    day:"numeric",
-                    month:"short"
+                    day: "numeric",
+                    month: "short"
                 }
             )}
         </div>
@@ -331,182 +431,76 @@ const recentFixtures =
 
 });
 
-<button
-    class="notify-btn"
-    onclick="saveNotification(
-        ${match.id},
-        '${match.home_team}',
-        '${match.away_team}',
-        '${match.event_date}'
-    )"
->
-🔔 Notify Me
-</button>
-    const fixtureGrid =
-        document.getElementById(
-            "fixtureGrid"
-        );
-        const playersByNationalTeam = {};
+const playersGrid =
+    document.createElement("div");
 
-worldCupPlayers.forEach(player => {
+playersGrid.className =
+    "players-grid";
 
-    if (!playersByNationalTeam[player.national_team_id]) {
+dashboard.appendChild(playersGrid);
 
-        playersByNationalTeam[
+sortedPlayers.forEach(player => {
+
+    const card =
+        document.createElement("div");
+
+    card.className =
+        "player-card";
+
+    const nextFixture =
+        nextFixtureByTeam[
             player.national_team_id
-        ] = [];
+        ];
+
+    let nextMatchHTML =
+        "<p>No upcoming match</p>";
+
+    if (nextFixture) {
+
+        nextMatchHTML = `
+            <p>
+                ${nextFixture.home_team}
+                vs
+                ${nextFixture.away_team}
+            </p>
+
+            <p>
+                📅 ${new Date(
+                    nextFixture.event_date
+                ).toLocaleDateString(
+                    "en-GB",
+                    {
+                        day: "numeric",
+                        month: "short"
+                    }
+                )}
+            </p>
+        `;
 
     }
 
-    playersByNationalTeam[
-        player.national_team_id
-    ].push(player.name);
+    card.innerHTML = `
+        <h3>
+            ${FLAGS[player.nationality] || "🌍"}
+            ${player.name}
+        </h3>
+
+        <p>
+            ${player.specific_position}
+            •
+            ${player.nationality}
+        </p>
+
+        ${nextMatchHTML}
+    `;
+
+    playersGrid.appendChild(card);
 
 });
-
-    nextFiveFixtures.forEach(match => {
-
-        const fixtureCard =
-            document.createElement("div");
-
-        fixtureCard.className =
-            "fixture-card";
-
-     const homePlayers =
-    playersByNationalTeam[
-        match.home_team_id
-    ] || [];
-
-const awayPlayers =
-    playersByNationalTeam[
-        match.away_team_id
-    ] || [];
-
-const fixturePlayers = [
-    ...homePlayers,
-    ...awayPlayers
-];
-
-fixtureCard.innerHTML = `
-    <div class="fixture-teams">
-        ${match.home_team}
-        <span>vs</span>
-        ${match.away_team}
-    </div>
-
-    <div class="fixture-date">
-        📅 ${new Date(
-            match.event_date
-        ).toLocaleDateString(
-            "en-GB",
-            {
-                day: "numeric",
-                month: "short"
-            }
-        )}
-    </div>
-
-    <div class="fixture-players">
-        👥 ${fixturePlayers.join(", ")}
-    </div>
-
-    <button
-        class="notify-btn"
-        onclick="saveNotification(
-            ${match.id},
-            '${match.home_team}',
-            '${match.away_team}',
-            '${match.event_date}'
-        )"
-    >
-        🔔 Notify Me
-    </button>
-`;
-
-        fixtureGrid.appendChild(
-            fixtureCard
-        );
-
-    });
-
-    const playersGrid =
-        document.createElement("div");
-
-    playersGrid.className =
-        "players-grid";
-
-    dashboard.appendChild(playersGrid);
-
-    sortedPlayers.forEach(player => {
-
-        const card =
-            document.createElement("div");
-
-        card.className =
-            "player-card";
-
-        const nextFixture =
-            nextFixtureByTeam[
-                player.national_team_id
-            ];
-
-        let nextMatchHTML =
-            "<p>No upcoming match</p>";
-
-        if (nextFixture) {
-
-            const matchDate =
-                new Date(
-                    nextFixture.event_date
-                );
-
-            nextMatchHTML = `
-                <p>
-                    <strong>
-                        ${nextFixture.home_team}
-                    </strong>
-
-                    vs
-
-                    <strong>
-                        ${nextFixture.away_team}
-                    </strong>
-                </p>
-
-                <p>
-                    📅
-                    ${matchDate.toLocaleDateString(
-                        "en-GB",
-                        {
-                            day: "numeric",
-                            month: "short"
-                        }
-                    )}
-                </p>
-            `;
-
-        }
-
-        card.innerHTML = `
-            <h3>
-                ${FLAGS[player.nationality] || "🌍"}
-                ${player.name}
-            </h3>
-
-            <p>
-                ${player.specific_position}
-                •
-                ${player.nationality}
-            </p>
-
-            ${nextMatchHTML}
-        `;
-
-        playersGrid.appendChild(card);
-
-    });
+```
 
 }
+
 
 function getWorldCupPlayers(players) {
 
