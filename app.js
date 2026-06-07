@@ -189,6 +189,25 @@ const recentFixtures =
     const matchesThisWeek =
     nextFiveFixtures.length;
 
+    const playersPlayingSoon = sortedPlayers.filter(player => {
+
+    const fixture =
+        nextFixtureByTeam[player.national_team_id];
+
+    if (!fixture) return false;
+
+    const fixtureDate = new Date(fixture.event_date);
+
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    return (
+        fixtureDate.toDateString() ===
+        tomorrow.toDateString()
+    );
+
+}).length;
+
     const sortedPlayers =
         [...worldCupPlayers];
 
@@ -251,7 +270,7 @@ const recentFixtures =
 
             <div class="summary-card">
                 <div class="summary-number">
-                    ${nextFiveFixtures.length}
+                   ${playersPlayingSoon}
                 </div>
                 <div class="summary-label">
                     Playing Soon
@@ -262,13 +281,16 @@ const recentFixtures =
 
         <h3 class="section-heading">
     ⚽ Next 5 World Cup Fixtures
+</h3>
+
+<div id="fixtureGrid"></div>
+
+<h3 class="section-heading">
     🏆 Last 5 Results
 </h3>
-<div id="resultsGrid"></div>
-        <div id="fixtureGrid"></div>
 
-        <h3>🌍 World Cup Players</h3>
-    `;
+<div id="resultsGrid"></div>
+
     const resultsGrid =
     document.getElementById(
         "resultsGrid"
@@ -387,6 +409,18 @@ fixtureCard.innerHTML = `
     <div class="fixture-players">
         👥 ${fixturePlayers.join(", ")}
     </div>
+
+    <button
+        class="notify-btn"
+        onclick="saveNotification(
+            ${match.id},
+            '${match.home_team}',
+            '${match.away_team}',
+            '${match.event_date}'
+        )"
+    >
+        🔔 Notify Me
+    </button>
 `;
 
         fixtureGrid.appendChild(
