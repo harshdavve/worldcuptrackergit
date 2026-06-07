@@ -403,11 +403,13 @@ nextFiveFixtures.forEach(match => {
         <div class="fixture-date">
             📅 ${new Date(
                 match.event_date
-            ).toLocaleDateString(
-                "en-GB",
+            ).toLocaleString(
+                [],
                 {
                     day: "numeric",
-                    month: "short"
+                    month: "short",
+                    hour: "2-digit",
+                    minute: "2-digit"
                 }
             )}
         </div>
@@ -494,11 +496,13 @@ lastFiveResults.forEach(match => {
         <div class="fixture-date">
             📅 ${new Date(
                 match.event_date
-            ).toLocaleDateString(
-                "en-GB",
+            ).toLocaleString(
+                [],
                 {
                     day: "numeric",
-                    month: "short"
+                    month: "short",
+                    hour: "2-digit",
+                    minute: "2-digit"
                 }
             )}
         </div>
@@ -548,11 +552,13 @@ sortedPlayers.forEach(player => {
             <p>
                 📅 ${new Date(
                     nextFixture.event_date
-                ).toLocaleDateString(
-                    "en-GB",
+                ).toLocaleString(
+                    [],
                     {
                         day: "numeric",
-                        month: "short"
+                        month: "short",
+                        hour: "2-digit",
+                        minute: "2-digit"
                     }
                 )}
             </p>
