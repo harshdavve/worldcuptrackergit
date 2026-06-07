@@ -89,7 +89,6 @@ async function loadClub(club) {
 
 async function displayPlayers(club, players) {
 
-```
 const dashboard = document.getElementById("dashboard");
 
 const worldCupPlayers = getWorldCupPlayers(players);
@@ -497,7 +496,6 @@ sortedPlayers.forEach(player => {
     playersGrid.appendChild(card);
 
 });
-```
 
 }
 
