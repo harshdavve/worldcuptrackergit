@@ -25,6 +25,39 @@ const FLAGS = {
     Croatia:"🇭🇷"
 };
 
+// Register service worker for push notifications
+if ("serviceWorker" in navigator) {
+    navigator.serviceWorker
+        .register("/sw.js")
+        .then(reg => {
+            console.log("Service worker registered:", reg.scope);
+            syncNotificationsToSW();
+        })
+        .catch(err =>
+            console.error("Service worker registration failed:", err)
+        );
+}
+
+// On page load, re-sync any stored notifications to the SW
+// so scheduled alerts survive page refreshes
+function syncNotificationsToSW() {
+
+    if (
+        !navigator.serviceWorker.controller
+    ) return;
+
+    const notifications =
+        JSON.parse(
+            localStorage.getItem("notifications") || "[]"
+        );
+
+    navigator.serviceWorker.controller.postMessage({
+        type: "SYNC_NOTIFICATIONS",
+        notifications
+    });
+
+}
+
 renderClubs();
 
 
@@ -418,10 +451,34 @@ lastFiveResults.forEach(match => {
     const scorers =
         scorersByMatch[match.id] || [];
 
+    const homeScorers =
+        scorers
+            .filter(s =>
+                s.teamId === match.home_team_id ||
+                s.teamId === "home"
+            )
+            .map(s => s.name);
+
+    const awayScorers =
+        scorers
+            .filter(s =>
+                s.teamId === match.away_team_id ||
+                s.teamId === "away"
+            )
+            .map(s => s.name);
+
     const scorersHTML =
         scorers.length > 0
             ? `<div class="fixture-players">
-                   ⚽ ${scorers.join(", ")}
+                   ${homeScorers.length > 0
+                       ? `<span>${match.home_team}: ⚽ ${homeScorers.join(", ")}</span>`
+                       : ""}
+                   ${homeScorers.length > 0 && awayScorers.length > 0
+                       ? `<span class="scorer-divider"> | </span>`
+                       : ""}
+                   ${awayScorers.length > 0
+                       ? `<span>${match.away_team}: ⚽ ${awayScorers.join(", ")}</span>`
+                       : ""}
                </div>`
             : "";
 
@@ -611,11 +668,16 @@ async function getMatchScorers(eventId) {
                     type === "own_goal";
                 return type === "goal" && !isOwnGoal;
             })
-            .map(incident =>
-                incident.player_name ||
-                incident.player ||
-                "Unknown"
-            );
+            .map(incident => ({
+                name:
+                    incident.player_name ||
+                    incident.player ||
+                    "Unknown",
+                teamId:
+                    incident.team_id ||
+                    incident.team ||
+                    (incident.is_home ? "home" : "away")
+            }));
 
     }
     catch (error) {
@@ -656,20 +718,54 @@ searchInput.addEventListener("input", e => {
 });
 }
 
-function saveNotification(
+async function saveNotification(
     fixtureId,
     homeTeam,
     awayTeam,
     matchDate
-){
+) {
 
+    // 1. Request notification permission if not already granted
+    if (!("Notification" in window)) {
+        alert(
+            "Your browser does not support notifications."
+        );
+        return;
+    }
+
+    let permission = Notification.permission;
+
+    if (permission === "denied") {
+        alert(
+            "Notifications are blocked. Please enable them in your browser settings."
+        );
+        return;
+    }
+
+    if (permission !== "granted") {
+        permission =
+            await Notification.requestPermission();
+    }
+
+    if (permission !== "granted") return;
+
+    // 2. Check for duplicates before saving
     const notifications =
         JSON.parse(
-            localStorage.getItem(
-                "notifications"
-            ) || "[]"
+            localStorage.getItem("notifications") || "[]"
         );
 
+    const alreadySaved =
+        notifications.some(
+            n => n.fixtureId === fixtureId
+        );
+
+    if (alreadySaved) {
+        alert("You're already set for notifications for this match!");
+        return;
+    }
+
+    // 3. Save to localStorage
     notifications.push({
         fixtureId,
         homeTeam,
@@ -679,13 +775,33 @@ function saveNotification(
 
     localStorage.setItem(
         "notifications",
-        JSON.stringify(
-            notifications
-        )
+        JSON.stringify(notifications)
     );
 
+    // 4. Sync updated list to the service worker
+    if (
+        navigator.serviceWorker &&
+        navigator.serviceWorker.controller
+    ) {
+        navigator.serviceWorker.controller.postMessage({
+            type: "SYNC_NOTIFICATIONS",
+            notifications
+        });
+    }
+
+    const matchTime =
+        new Date(matchDate).toLocaleString(
+            "en-GB",
+            {
+                day: "numeric",
+                month: "short",
+                hour: "2-digit",
+                minute: "2-digit"
+            }
+        );
+
     alert(
-        "Notification saved!"
+        `You'll be notified 60 and 30 minutes before ${homeTeam} vs ${awayTeam} (${matchTime}).`
     );
 
 }
