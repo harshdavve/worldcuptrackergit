@@ -696,8 +696,7 @@ async function getMatchScorers(eventId) {
 
 }
 
-const searchInput =
-    document.getElementById("clubSearch");
+
 
 const searchInput =
     document.getElementById("clubSearch");
