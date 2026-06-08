@@ -699,29 +699,51 @@ async function getMatchScorers(eventId) {
 const searchInput =
     document.getElementById("clubSearch");
 
-if(searchInput){
+const searchInput =
+    document.getElementById("clubSearch");
 
-searchInput.addEventListener("input", e => {
+if (searchInput) {
 
-    const search =
-        e.target.value.toLowerCase();
+    searchInput.addEventListener("input", e => {
 
-    const cards =
-        document.querySelectorAll(".club-card");
+        const search =
+            e.target.value.toLowerCase().trim();
 
-    cards.forEach(card => {
+        const grid =
+            document.getElementById("clubGrid");
 
-        const clubName =
-            card.innerText.toLowerCase();
+        grid.innerHTML = "";
 
-        card.style.display =
-            clubName.includes(search)
-            ? "block"
-            : "none";
+        const clubsToShow = search
+            ? CLUBS.filter(club =>
+                club.name
+                    .toLowerCase()
+                    .includes(search)
+              )
+            : CLUBS.slice(0, 6);
+
+        clubsToShow.forEach(club => {
+
+            const card =
+                document.createElement("div");
+
+            card.className =
+                "club-card";
+
+            card.innerHTML = `
+                <h3>${club.name}</h3>
+            `;
+
+            card.onclick = () => {
+                loadClub(club);
+            };
+
+            grid.appendChild(card);
+
+        });
 
     });
 
-});
 }
 
 async function saveNotification(
