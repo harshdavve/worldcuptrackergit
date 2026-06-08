@@ -68,23 +68,23 @@ function renderClubs() {
 
     grid.innerHTML = "";
 
-    CLUBS.forEach(club => {
+    CLUBS.slice(0, 6).forEach(club => {
 
-        const card = document.createElement("div");
+    const card = document.createElement("div");
 
-        card.className = "club-card";
+    card.className = "club-card";
 
-        card.innerHTML = `
-            <h3>${club.name}</h3>
-        `;
+    card.innerHTML = `
+        <h3>${club.name}</h3>
+    `;
 
-        card.onclick = () => {
-            loadClub(club);
-        };
+    card.onclick = () => {
+        loadClub(club);
+    };
 
-        grid.appendChild(card);
+    grid.appendChild(card);
 
-    });
+});
 
 }
 
