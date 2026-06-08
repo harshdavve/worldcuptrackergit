@@ -341,7 +341,7 @@ dashboard.innerHTML = `
     <div id="resultsGrid"></div>
 
     <h3 class="section-heading">
-        🌍 World Cup Players
+        🌍 Players at the world cup
     </h3>
 `;
 
